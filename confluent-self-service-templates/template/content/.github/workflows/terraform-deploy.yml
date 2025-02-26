@@ -1,0 +1,37 @@
+name: "Terraform Deploy"
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      CONFLUENT_CLOUD_API_KEY: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_KEY }}{% endraw %}
+      CONFLUENT_CLOUD_API_SECRET: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_SECRET }}{% endraw %}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+
+      - name: Initialize Terraform
+        working-directory: .
+        run: terraform init
+
+      - name: Validate Terraform
+        working-directory: .
+        run: terraform validate
+
+      - name: Plan Terraform
+        working-directory: .
+        run: terraform plan -out=tfplan
+
+      - name: Apply Terraform
+        working-directory: .
+        run: terraform apply -auto-approve tfplan

@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.environment_name | dump }}
+  annotations:
+    github.com/project-slug: dwessendorf/cc-env-${{ values.environment_name }}
+    backstage.io/techdocs-ref: dir:.# Add this line
+spec:
+  type: service
+  owner: group:guests
+  lifecycle: experimental

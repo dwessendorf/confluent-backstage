@@ -1,0 +1,68 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: confluent-cloud-environment  
+  title: Deploy Confluent Cloud Environment
+  description: A Backstage template to create a Confluent Cloud environment using Terraform.
+spec:
+  owner: group:guests
+  type: service
+
+  parameters:
+    - title: Confluent Cloud Configuration
+      required:
+        - environment_name
+        - confluent_api_key
+        - confluent_api_secret
+      properties:
+        environment_name:
+          title: Environment Name
+          type: string
+          description: Name of the Confluent Cloud environment.
+        confluent_api_key:
+          title: Confluent API Key
+          type: string
+          description: API Key for Confluent Cloud authentication.
+        confluent_api_secret:
+          title: Confluent API Secret
+          type: string
+          description: API Secret for Confluent Cloud authentication.
+  steps:
+    - id: fetch-repository
+      name: Fetch Repository
+      action: fetch:template
+      input:
+        url: ./content
+        copyWithoutTemplating:
+          - terraform-deploy.yml
+        values:
+          environment_name: ${{ parameters.environment_name }} 
+          cloud_provider: ${{ parameters.cloud_provider}}
+          region: ${{ parameters.region}}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: "Terraform for Confluent Cloud Environment"
+        repoUrl: "github.com?owner=dwessendorf&repo=cc-env-${{ parameters.environment_name }}"
+        defaultBranch: main
+        repoVisibility: public
+        secrets:
+          CONFLUENT_CLOUD_API_KEY: ${{ parameters.confluent_api_key }}
+          CONFLUENT_CLOUD_API_SECRET: ${{ parameters.confluent_api_secret }}
+
+    - id: register
+      name: Register in Backstage
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}

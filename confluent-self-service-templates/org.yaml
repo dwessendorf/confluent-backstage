@@ -1,0 +1,24 @@
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: dwessendorf
+  annotations:
+    # This can vary depending on your resolver config, but for GitHub you often need:
+    github.com/login: dwessendorf
+spec:
+  profile:
+    displayName: "Daniel Wessendorf"
+    email: "dan@bossmail.de"
+  memberOf: [guests]
+
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: guests
+spec:
+  type: team
+  children: []

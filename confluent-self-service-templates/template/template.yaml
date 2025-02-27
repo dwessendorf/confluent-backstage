@@ -49,6 +49,10 @@ spec:
         repoUrl: "github.com?owner=dwessendorf&repo=cc-env-${{ parameters.environment_name }}"
         defaultBranch: main
         repoVisibility: public
+        requireCodeOwnerReviews: false
+        bypassPullRequestAllowances: 
+          teams: [guests]
+        requiredApprovingReviewCount: 0
         secrets:
           CONFLUENT_CLOUD_API_KEY: ${{ parameters.confluent_api_key }}
           CONFLUENT_CLOUD_API_SECRET: ${{ parameters.confluent_api_secret }}

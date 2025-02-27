@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   push:
 
+# Add this permissions block
+permissions:
+  contents: write
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -35,46 +39,70 @@ jobs:
       - name: Apply Terraform
         working-directory: .
         run: terraform apply -auto-approve tfplan
-
-                
-      - name: Extract Terraform Outputs
-        id: terraform_output
-        working-directory: .
-        run: |
-          ENVIRONMENT_ID=$(terraform output -raw environment_id)
-          ENVIRONMENT_NAME=$(terraform output -raw environment_name)
-          
-          # Create env_output.json file
-          echo "{\"environment_id\": \"$ENVIRONMENT_ID\", \"environment_name\": \"$ENVIRONMENT_NAME\"}" > docs/env_output.json
         
-      - name: Update Environment Details
+      - name: Extract Terraform Outputs and Create Documentation
         run: |
-          # Process the markdown files using the output JSON
-          pip install jinja2
-          python - << EOF
-          import json
-          from jinja2 import Template
-          import os
+          # Use the correct terraform binary path
+          TERRAFORM_BIN="${TERRAFORM_CLI_PATH}/terraform-bin"
           
-          # Load environment outputs
-          with open('docs/env_output.json', 'r') as f:
-              env_data = json.load(f)
-              
-          # Update the environment-details.md file
-          with open('docs/environment-details.md', 'r') as f:
-              template_content = f.read()
-              
-          template = Template(template_content)
-          rendered = template.render(env_output=env_data)
+          # Properly capture terraform outputs
+          ENV_ID=$(${TERRAFORM_BIN} output -raw environment_id)
+          ENV_NAME=$(${TERRAFORM_BIN} output -raw environment_name)
           
-          with open('docs/environment-details.md', 'w') as f:
-              f.write(rendered)
-          EOF
+          echo "Environment ID: $ENV_ID"
+          echo "Environment Name: $ENV_NAME"
           
-      - name: Commit and Push Updated Docs
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add docs/
-          git commit -m "Update environment documentation with Terraform outputs" || echo "No changes to commit"
-          git push
+          # Create the files with the correct content
+          mkdir -p docs
+          
+          cat > docs/environment-details.md << EOL
+          # Environment Details
+          
+          ## Environment Information
+          
+          - **Name**: ${ENV_NAME}
+          - **Environment ID**: ${ENV_ID}
+          
+          The Environment ID was automatically populated after the Terraform deployment completed successfully.
+          
+          ## Access
+          
+          Access to this environment is controlled via Confluent Cloud. Please contact the administrators to request access.
+          EOL
+          
+          cat > docs/operations.md << EOL
+          # Operations Guide
+          
+          ## Accessing the Environment
+          
+          To access this environment in the Confluent Cloud Console:
+          
+          1. Log in to [Confluent Cloud](https://confluent.cloud/)
+          2. Navigate to Environments
+          3. Select "${ENV_NAME}" from the list
+          
+          ## Using the CLI
+          
+          You can use the Confluent CLI to interact with this environment:
+          
+          \`\`\`bash
+          # Set up authentication
+          confluent login
+          
+          # List available environments
+          confluent environment list
+          
+          # Select this environment
+          confluent environment use ${ENV_ID}
+          \`\`\`
+          
+          You can use the environment ID listed above.
+          EOL
+            
+      - name: Push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Add automated changes'
+          add: '.'
+          push: true
+          default_author: github_actions

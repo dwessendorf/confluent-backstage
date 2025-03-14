@@ -9,3 +9,4 @@ spec:
   type: service
   owner: group:guests
   lifecycle: experimental
+  system: confluent-cloud

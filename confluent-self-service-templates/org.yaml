@@ -3,14 +3,14 @@
 apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
-  name: dwessendorf
+  name: ${GITHUB_USER_NAME}
   annotations:
     # This can vary depending on your resolver config, but for GitHub you often need:
-    github.com/login: dwessendorf
+    github.com/login: ${GITHUB_USER_NAME}
 spec:
   profile:
-    displayName: "Daniel Wessendorf"
-    email: "dan@bossmail.de"
+    displayName: ${GITHUB_USER_DISPLAY_NAME}
+    email: ${GITHUB_USER_EMAIL}
   memberOf: [guests]
 
 ---

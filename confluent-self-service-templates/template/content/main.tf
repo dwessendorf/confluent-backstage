@@ -7,8 +7,8 @@ terraform {
   }
 }
 provider "confluent" {
-  # Use your Confluent Cloud credentials (set these via environment variables)
-  # For example, export CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET
+  # The provider will automatically use CONFLUENT_CLOUD_API_KEY and CONFLUENT_CLOUD_API_SECRET
+  # environment variables without explicit configuration
 }
 
 variable "environment_name" {

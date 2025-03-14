@@ -7,6 +7,7 @@
  */
 
 import { createBackend } from '@backstage/backend-defaults';
+import { scaffolderConfluentActionsModule } from './modules/scaffolder-confluent-actions';
 
 const backend = createBackend();
 
@@ -14,6 +15,8 @@ backend.add(import('@backstage/plugin-app-backend'));
 backend.add(import('@backstage/plugin-proxy-backend'));
 backend.add(import('@backstage/plugin-scaffolder-backend'));
 backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
+// Add our custom Confluent actions module
+backend.add(scaffolderConfluentActionsModule);
 backend.add(import('@backstage/plugin-techdocs-backend'));
 
 // auth plugin

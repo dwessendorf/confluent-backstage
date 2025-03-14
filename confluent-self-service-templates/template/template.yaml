@@ -12,22 +12,18 @@ spec:
     - title: Confluent Cloud Configuration
       required:
         - environment_name
-        - confluent_api_key
-        - confluent_api_secret
       properties:
         environment_name:
           title: Environment Name
           type: string
           description: Name of the Confluent Cloud environment.
-        confluent_api_key:
-          title: Confluent API Key
-          type: string
-          description: API Key for Confluent Cloud authentication.
-        confluent_api_secret:
-          title: Confluent API Secret
-          type: string
-          description: API Secret for Confluent Cloud authentication.
+        # Removed confluent_api_key and confluent_api_secret from user input
   steps:
+    # Get Confluent credentials from environment variables
+    - id: get-credentials
+      name: Get Confluent Credentials
+      action: confluent:credentials:get
+
     - id: fetch-repository
       name: Fetch Repository
       action: fetch:template
@@ -54,8 +50,9 @@ spec:
           teams: [guests]
         requiredApprovingReviewCount: 0
         secrets:
-          CONFLUENT_CLOUD_API_KEY: ${{ parameters.confluent_api_key }}
-          CONFLUENT_CLOUD_API_SECRET: ${{ parameters.confluent_api_secret }}
+          # Use the credentials from our custom action
+          CONFLUENT_CLOUD_API_KEY: ${{ steps['get-credentials'].output.apiKey }}
+          CONFLUENT_CLOUD_API_SECRET: ${{ steps['get-credentials'].output.apiSecret }}
 
     - id: register
       name: Register in Backstage

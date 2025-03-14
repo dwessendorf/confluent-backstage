@@ -5,6 +5,11 @@ app:
 organization:
   name: My Company
 
+# Add Confluent Cloud integration configuration
+confluent:
+  apiKey: ${CONFLUENT_CLOUD_API_KEY}
+  apiSecret: ${CONFLUENT_CLOUD_API_SECRET}
+
 backend:
   # Used for enabling authentication, secret is shared by all backend plugins
   # See https://backstage.io/docs/auth/service-to-service-auth for

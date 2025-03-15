@@ -16,8 +16,7 @@ export const scaffolderConfluentActionsModule = createBackendModule({
       },
       async init({ scaffolderActions }) {
         scaffolderActions.addActions(
-          createGetConfluentCredentialsAction(),
-          
+          createGetConfluentCredentialsAction() 
         );
       },
     });

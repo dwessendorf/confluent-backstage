@@ -3,7 +3,7 @@ import { scaffolderActionsExtensionPoint } from '@backstage/plugin-scaffolder-no
 import { createGetConfluentCredentialsAction } from '../plugins/scaffolder/actions';
 
 /**
- * Module that adds the Confluent credentials action to the scaffolder.
+ * Module that adds the Confluent actions to the scaffolder.
  * @public
  */
 export const scaffolderConfluentActionsModule = createBackendModule({
@@ -15,7 +15,10 @@ export const scaffolderConfluentActionsModule = createBackendModule({
         scaffolderActions: scaffolderActionsExtensionPoint,
       },
       async init({ scaffolderActions }) {
-        scaffolderActions.addActions(createGetConfluentCredentialsAction());
+        scaffolderActions.addActions(
+          createGetConfluentCredentialsAction(),
+          
+        );
       },
     });
   },

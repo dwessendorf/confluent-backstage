@@ -1,16 +1,18 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.environment_name | dump }}
+  name: ${{ values.cluster_name | dump }}
   links:
     - url: https://confluent.cloud
       title: Confluent Cloud Console
       icon: dashboard
   annotations:
-    github.com/project-slug: dwessendorf/cc-env-${{ values.environment_name }}
-    backstage.io/techdocs-ref: dir:.# Add this line
+    github.com/project-slug: dwessendorf/cc-cluster-${{ values.cluster_name }}
+    backstage.io/techdocs-ref: dir:.
 spec:
-  type: confluent-environment
+  type: confluent-cluster
   owner: group:guests
   lifecycle: experimental
   system: confluent-cloud
+  dependsOn:
+    - component:default/${{ values.environment_name }}

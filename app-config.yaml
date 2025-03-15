@@ -114,6 +114,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Add the new cluster template
+    - type: file
+      target: ../../confluent-self-service-templates/cluster-template/template.yaml
+      rules:
+        - allow: [Template]
+
     ## Uncomment these lines to add more example data
     # - type: url
     #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml

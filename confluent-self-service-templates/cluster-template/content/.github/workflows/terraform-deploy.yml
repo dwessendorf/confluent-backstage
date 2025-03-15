@@ -1,0 +1,117 @@
+name: "Terraform Deploy"
+
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      CONFLUENT_CLOUD_API_KEY: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_KEY }}{% endraw %}
+      CONFLUENT_CLOUD_API_SECRET: {% raw %}${{ secrets.CONFLUENT_CLOUD_API_SECRET }}{% endraw %}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+
+      - name: Initialize Terraform
+        working-directory: .
+        run: terraform init
+
+      - name: Validate Terraform
+        working-directory: .
+        run: terraform validate
+
+      - name: Plan Terraform
+        working-directory: .
+        run: terraform plan -out=tfplan
+
+      - name: Apply Terraform
+        working-directory: .
+        run: terraform apply -auto-approve tfplan
+
+      - name: Extract Terraform Outputs and Create Documentation
+        run: |
+          # Use the correct terraform binary path
+          TERRAFORM_BIN="${TERRAFORM_CLI_PATH}/terraform-bin"
+          
+          # Properly capture terraform outputs
+          CLUSTER_ID=$(${TERRAFORM_BIN} output -raw cluster_id)
+          CLUSTER_NAME=$(${TERRAFORM_BIN} output -raw cluster_name)
+          BOOTSTRAP_ENDPOINT=$(${TERRAFORM_BIN} output -raw bootstrap_endpoint)
+          ENV_ID=$(${TERRAFORM_BIN} output -raw environment_id)
+          ENV_NAME=$(${TERRAFORM_BIN} output -raw environment_name)
+          
+          echo "Cluster ID: $CLUSTER_ID"
+          echo "Cluster Name: $CLUSTER_NAME"
+          echo "Environment ID: $ENV_ID"
+          echo "Environment Name: $ENV_NAME"
+          
+          # Create the files with the correct content
+          mkdir -p docs
+          
+          cat > docs/cluster-details.md << EOL
+          # Cluster Details
+          
+          ## Cluster Information
+          
+          - **Name**: ${CLUSTER_NAME}
+          - **Cluster ID**: ${CLUSTER_ID}
+          - **Bootstrap Endpoint**: ${BOOTSTRAP_ENDPOINT}
+          - **Parent Environment**: ${ENV_NAME}
+          - **Environment ID**: ${ENV_ID}
+          
+          The Cluster ID and Bootstrap Endpoint were automatically populated after the Terraform deployment completed successfully.
+          
+          ## Access
+          
+          Access to this cluster is controlled via Confluent Cloud. Please contact the administrators to request access.
+          EOL
+          
+          cat > docs/operations.md << EOL
+          # Operations Guide
+          
+          ## Accessing the Cluster
+          
+          To access this cluster in the Confluent Cloud Console:
+          
+          1. Log in to [Confluent Cloud](https://confluent.cloud/)
+          2. Navigate to Environments
+          3. Select "${ENV_NAME}" from the list
+          4. Click on the cluster "${CLUSTER_NAME}"
+          
+          ## Using the CLI
+          
+          You can use the Confluent CLI to interact with this cluster:
+          
+          \`\`\`bash
+          # Set up authentication
+          confluent login
+          
+          # List available environments
+          confluent environment list
+          
+          # Select the environment
+          confluent environment use ${ENV_ID}
+          
+          # List clusters in the environment
+          confluent kafka cluster list
+          
+          # Select this cluster
+          confluent kafka cluster use ${CLUSTER_ID}
+          \`\`\`
+          
+          You can use the cluster ID listed above.
+          EOL
+            
+      - name: Push changes
+        uses: EndBug/add-and-commit@v9 

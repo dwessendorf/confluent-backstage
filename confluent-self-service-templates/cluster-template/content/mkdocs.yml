@@ -1,0 +1,15 @@
+site_name: '${{ values.cluster_name }}'
+site_description: 'Documentation for Confluent Cloud Cluster ${{ values.cluster_name }}'
+
+nav:
+  - Home: index.md
+  - Cluster Details: cluster-details.md
+  - Operations: operations.md
+
+plugins:
+  - techdocs-core
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences 
